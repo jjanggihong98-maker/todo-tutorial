@@ -8,6 +8,7 @@ import {
   type Category,
   type Priority,
 } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,6 +18,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+// 선택 칩의 아이콘과 선택 시 그라데이션. 접근성 이름에는 포함하지 않는다.
+const CHIP_STYLES: Record<Priority | Category | "none", { icon: string; selected: string }> = {
+  high: { icon: "🔥", selected: "from-rose-500 to-orange-400 shadow-rose-500/40" },
+  medium: { icon: "⚡", selected: "from-amber-500 to-orange-500 shadow-amber-500/40" },
+  low: { icon: "🌱", selected: "from-emerald-400 to-teal-400 shadow-emerald-400/40" },
+  none: { icon: "✨", selected: "from-slate-500 to-slate-400 shadow-slate-500/40" },
+  work: { icon: "💼", selected: "from-blue-500 to-cyan-400 shadow-blue-500/40" },
+  personal: { icon: "🏡", selected: "from-emerald-500 to-lime-400 shadow-emerald-500/40" },
+  shopping: { icon: "🛍️", selected: "from-violet-500 to-fuchsia-400 shadow-violet-500/40" },
+};
+
+const CHIP_BASE =
+  "rounded-full border px-3 transition-all duration-200 hover:-translate-y-0.5 active:scale-95";
+
+function chipClass(key: keyof typeof CHIP_STYLES, selected: boolean) {
+  return cn(
+    CHIP_BASE,
+    selected
+      ? cn(
+          "border-transparent bg-linear-to-r text-white shadow-md hover:text-white",
+          CHIP_STYLES[key].selected
+        )
+      : "bg-background/60 hover:shadow-sm"
+  );
+}
+
+function ChipIcon({ name }: { name: keyof typeof CHIP_STYLES }) {
+  return <span aria-hidden="true">{CHIP_STYLES[name].icon}</span>;
+}
 
 interface TodoInputProps {
   onAdd: (
@@ -67,7 +98,7 @@ export function TodoInput({ onAdd }: TodoInputProps) {
             className="w-auto"
           />
 
-          <div role="radiogroup" aria-label="우선순위" className="flex gap-1">
+          <div role="radiogroup" aria-label="우선순위" className="flex flex-wrap gap-2">
             {PRIORITIES.map((item) => {
               const selected = item.value === priority;
               return (
@@ -75,26 +106,30 @@ export function TodoInput({ onAdd }: TodoInputProps) {
                   key={item.value}
                   type="button"
                   size="sm"
-                  variant={selected ? "default" : "outline"}
+                  variant="outline"
                   role="radio"
                   aria-checked={selected}
                   onClick={() => setPriority(item.value)}
+                  className={chipClass(item.value, selected)}
                 >
+                  <ChipIcon name={item.value} />
                   {item.label}
                 </Button>
               );
             })}
           </div>
 
-          <div role="radiogroup" aria-label="카테고리" className="flex gap-1">
+          <div role="radiogroup" aria-label="카테고리" className="flex flex-wrap gap-2">
             <Button
               type="button"
               size="sm"
-              variant={category === undefined ? "default" : "outline"}
+              variant="outline"
               role="radio"
               aria-checked={category === undefined}
               onClick={() => setCategory(undefined)}
+              className={chipClass("none", category === undefined)}
             >
+              <ChipIcon name="none" />
               없음
             </Button>
             {CATEGORIES.map((item) => {
@@ -104,11 +139,13 @@ export function TodoInput({ onAdd }: TodoInputProps) {
                   key={item.value}
                   type="button"
                   size="sm"
-                  variant={selected ? "default" : "outline"}
+                  variant="outline"
                   role="radio"
                   aria-checked={selected}
                   onClick={() => setCategory(item.value)}
+                  className={chipClass(item.value, selected)}
                 >
+                  <ChipIcon name={item.value} />
                   {item.label}
                 </Button>
               );
@@ -117,7 +154,11 @@ export function TodoInput({ onAdd }: TodoInputProps) {
         </CardContent>
 
         <CardFooter>
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full animate-gradient-shift bg-linear-to-r from-[#FF0080] via-[#7928CA] to-[#0070F3] bg-size-[200%_auto] font-semibold text-white shadow-lg shadow-fuchsia-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-fuchsia-500/40 active:scale-[0.98]"
+          >
+            <span aria-hidden="true">✨</span>
             추가
           </Button>
         </CardFooter>
